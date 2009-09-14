@@ -626,7 +626,7 @@ public class SWTBotTreeItem extends AbstractSWTBot<TreeItem> {
 			}
 		});
 	}
-	
+
 	 /**
      * Gets if the item is expanded.
      * 
@@ -639,6 +639,14 @@ public class SWTBotTreeItem extends AbstractSWTBot<TreeItem> {
         return UIThreadRunnable.syncExec(new BoolResult() {
             public Boolean run() {
                 return widget.getExpanded();
+            }
+        });
+    }
+	@Override
+	protected Rectangle absoluteLocation() {
+		return UIThreadRunnable.syncExec(new Result<Rectangle>() {
+			public Rectangle run() {
+				return display.map(widget.getParent(), null, widget.getBounds());
             }
         });
     }

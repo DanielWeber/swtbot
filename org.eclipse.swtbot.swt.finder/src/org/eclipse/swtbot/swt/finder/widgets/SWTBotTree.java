@@ -43,7 +43,7 @@ import org.hamcrest.SelfDescribing;
  * @version $Id$
  */
 @SWTBotWidget(clasz = Tree.class, preferredName = "tree", referenceBy = { ReferenceBy.LABEL })
-public class SWTBotTree extends AbstractSWTBot<Tree> {
+public class SWTBotTree extends AbstractSWTBotControl<Tree> {
 
 	/**
 	 * Constructs an instance of this object with the given tree.

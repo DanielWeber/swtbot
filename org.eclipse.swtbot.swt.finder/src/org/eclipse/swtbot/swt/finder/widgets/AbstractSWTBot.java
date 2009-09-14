@@ -15,12 +15,16 @@ import static org.eclipse.swtbot.swt.finder.matchers.WidgetMatcherFactory.withMn
 import static org.eclipse.swtbot.swt.finder.waits.Conditions.widgetIsEnabled;
 import static org.hamcrest.Matchers.allOf;
 
+import java.awt.AWTException;
+import java.awt.Robot;
+import java.awt.event.InputEvent;
 import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.bindings.keys.KeyStroke;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -813,7 +817,7 @@ public abstract class AbstractSWTBot<T extends Widget> {
 
 	/**
 	 * Presses the shortcut specified by the given keys.
-	 *
+	 * 
 	 * @param modificationKeys the combination of {@link SWT#ALT} | {@link SWT#CTRL} | {@link SWT#SHIFT} |
 	 *            {@link SWT#COMMAND}.
 	 * @param c the character
@@ -829,8 +833,9 @@ public abstract class AbstractSWTBot<T extends Widget> {
 
 	/**
 	 * Presses the shortcut specified by the given keys.
-	 *
-	 * @param modificationKeys the combination of {@link SWT#ALT} | {@link SWT#CTRL} | {@link SWT#SHIFT} | {@link SWT#COMMAND}.
+	 * 
+	 * @param modificationKeys the combination of {@link SWT#ALT} | {@link SWT#CTRL} | {@link SWT#SHIFT} |
+	 *            {@link SWT#COMMAND}.
 	 * @param keyCode the keyCode, these may be special keys like F1-F12, or navigation keys like HOME, PAGE_UP
 	 * @param c the character
 	 * @return the same instance
@@ -845,7 +850,7 @@ public abstract class AbstractSWTBot<T extends Widget> {
 
 	/**
 	 * Presses the shortcut specified by the given keys.
-	 *
+	 * 
 	 * @param keys the keys to press
 	 * @return the same instance
 	 * @see Keyboard#pressShortcut(KeyStroke...)
@@ -856,5 +861,73 @@ public abstract class AbstractSWTBot<T extends Widget> {
 		setFocus();
 		keyboard().pressShortcut(keys);
 		return this;
+	}
+
+	/**
+	 * Performs a drag and drop operation from this widget to the given target
+	 * 
+	 * @param target To perform the drop on
+	 */
+	// TODO add modifier key mask
+	public void dragAndDrop(final AbstractSWTBot<? extends Widget> target) {
+		final Rectangle sourceLocation = absoluteLocation();
+		final int sourceOffsetX = Math.min((sourceLocation.width / 2), 10);
+		final int sourceOffsetY = Math.min((sourceLocation.height / 2), 10);
+		Point dragLocation = new Point(sourceLocation.x + sourceOffsetX, sourceLocation.y + sourceOffsetY);
+		dragAndDrop(dragLocation, target);
+	}
+
+	protected void dragAndDrop(final Point source, final AbstractSWTBot<? extends Widget> target) {
+		final Rectangle targetLocation = target.absoluteLocation();
+		doDragAndDrop(source, new Point(targetLocation.x + (targetLocation.width / 2), targetLocation.y + (targetLocation.height / 2)));
+	}
+
+	/**
+	 *
+	 */
+	private void doDragAndDrop(final Point source, final Point dest) {
+		log.debug(MessageFormat.format("Drag-and-dropping from ({0},{1}) to ({2},{3})", source.x, source.y, dest.x, dest.y));
+		try {
+			final Robot awtRobot = new Robot();
+			// the x+10 motion is needed to let native functions register a drag detect. It did not work under Windows
+			// otherwise and has been reported to be required for linux, too. But I could not test that.
+			syncExec(new VoidResult() {
+				public void run() {
+					awtRobot.mouseMove(source.x, source.y);
+					awtRobot.mousePress(InputEvent.BUTTON1_MASK);
+					awtRobot.mouseMove((source.x + 10), source.y);
+				}
+			});
+
+			// now pause the test until all runnables on the Display thread have run this is necessary for the pick up
+			// to register on linux
+			waitForIdle(awtRobot);
+
+			syncExec(new VoidResult() {
+				public void run() {
+					awtRobot.mouseMove((dest.x + 10), dest.y);
+					awtRobot.mouseMove(dest.x, dest.y);
+				}
+			});
+
+			waitForIdle(awtRobot);
+
+			syncExec(new VoidResult() {
+				public void run() {
+					awtRobot.mouseRelease(InputEvent.BUTTON1_MASK);
+				}
+			});
+			waitForIdle(awtRobot);
+		} catch (final AWTException e) {
+			log.error(e.getMessage(), e);
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	private void waitForIdle(final Robot robot) {
+		if (SWT.getPlatform().equals("gtk")) {
+			robot.waitForIdle();
+		}
 	}
 }

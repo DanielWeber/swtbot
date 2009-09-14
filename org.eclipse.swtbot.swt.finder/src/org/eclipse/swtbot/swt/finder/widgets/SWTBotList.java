@@ -11,12 +11,16 @@
 package org.eclipse.swtbot.swt.finder.widgets;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Widget;
 import org.eclipse.swtbot.swt.finder.ReferenceBy;
 import org.eclipse.swtbot.swt.finder.SWTBotWidget;
 import org.eclipse.swtbot.swt.finder.exceptions.WidgetNotFoundException;
 import org.eclipse.swtbot.swt.finder.results.ArrayResult;
 import org.eclipse.swtbot.swt.finder.results.IntResult;
+import org.eclipse.swtbot.swt.finder.results.Result;
 import org.eclipse.swtbot.swt.finder.results.StringResult;
 import org.eclipse.swtbot.swt.finder.results.VoidResult;
 import org.eclipse.swtbot.swt.finder.utils.MessageFormat;
@@ -227,5 +231,26 @@ public class SWTBotList extends AbstractSWTBotControl<List> {
 				return widget.getItems();
 			}
 		});
+	}
+
+	/**
+	 * @param item
+	 * @param target
+	 */
+	public void dragAndDrop(final String item, final AbstractSWTBot<? extends Widget> target) {
+		final int itemIdx = indexOf(item);
+		final Rectangle widgetLocation = absoluteLocation();
+		Point dragStart = syncExec(new Result<Point>() {
+			/*
+			 * (non-Javadoc)
+			 * @see org.eclipse.swtbot.swt.finder.results.Result#run()
+			 */
+			public Point run() {
+				return new Point(widgetLocation.x + 10, widgetLocation.y
+						+ (int) (itemIdx * widget.getItemHeight() + widget.getItemHeight() * 0.5));
+			}
+		});
+
+		dragAndDrop(dragStart, target);
 	}
 }
