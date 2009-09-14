@@ -1,0 +1,3 @@
+h3. Adding drag and drop to swtbot
+
+Changes in this branch add drag and drop support to swtbot, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=285271
