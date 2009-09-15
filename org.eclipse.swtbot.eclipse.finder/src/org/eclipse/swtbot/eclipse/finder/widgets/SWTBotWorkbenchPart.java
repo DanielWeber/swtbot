@@ -69,7 +69,7 @@ public abstract class SWTBotWorkbenchPart<T extends IWorkbenchPartReference> {
 	/** A helper swtbot instance. */
 	protected final SWTWorkbenchBot	bot;
 	private final ViewMenuFinder	menuFinder;
-	private final SelfDescribing	description;
+	protected final SelfDescribing  description;
 	private Widget widget;
 
 	/**

@@ -123,4 +123,12 @@ public class SWTBotEditor extends SWTBotWorkbenchPart<IEditorReference> {
 		return new SWTBotEclipseEditor(this.partReference, this.bot);
 	}
 
+	/**
+	 * @return an extended version of the editor bot which provides methods for form editors.
+	 * @throws WidgetNotFoundException if this is not a form editor
+	 */
+	public SWTBotFormEditor toFormEditor() {
+		return new SWTBotFormEditor(this.partReference, this.bot);
+	}
+
 }
