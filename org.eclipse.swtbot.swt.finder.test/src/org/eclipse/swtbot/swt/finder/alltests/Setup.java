@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Ketan Padegaonkar - initial API and implementation
  *******************************************************************************/
@@ -19,6 +19,7 @@ import org.eclipse.swt.examples.controlexample.ControlExample;
 import org.eclipse.swt.examples.controlexample.CustomControlExample;
 import org.eclipse.swt.examples.dnd.DNDExample;
 import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.snippets.Snippet91;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -76,6 +77,7 @@ public class Setup {
 		controls.menuShell.open();
 		controls.dndShell.open();
 		controls.browserShell.open();
+		controls.dndTreeShell.open();
 	}
 
 	protected boolean shouldRunInSeparateThread() {
@@ -119,6 +121,11 @@ public class Setup {
 			controls.browserShell = new Shell(controls.display, SWT.SHELL_TRIM);
 			controls.browserShell.setText("Browser shell");
 			controls.browserShell.setLayout(new FillLayout());
+
+		if ((controls.dndTreeShell == null) || controls.dndTreeShell.isDisposed()) {
+			controls.dndTreeShell = new Shell(controls.display, SWT.SHELL_TRIM);
+			controls.dndTreeShell.setText("DND Tree shell");
+			controls.dndTreeShell.setLayout(new FillLayout());
 		}
 
 	}
@@ -166,6 +173,10 @@ public class Setup {
 			if (!isMac())
 				controls.browserExample = new BrowserExample(controls.browserShell,false);
 			controls.dndExample.open(controls.dndShell);
+
+		if ((controls.dndTreeExample == null)) {
+			controls.dndTreeExample = new Snippet91();
+			controls.dndTreeExample.open(controls.dndTreeShell);
 		}
 
 	}

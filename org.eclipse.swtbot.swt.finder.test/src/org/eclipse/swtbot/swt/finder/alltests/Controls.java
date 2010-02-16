@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Ketan Padegaonkar - initial API and implementation
  *******************************************************************************/
@@ -17,6 +17,7 @@ import org.eclipse.swt.examples.clipboard.ClipboardExample;
 import org.eclipse.swt.examples.controlexample.ControlExample;
 import org.eclipse.swt.examples.controlexample.CustomControlExample;
 import org.eclipse.swt.examples.dnd.DNDExample;
+import org.eclipse.swt.snippets.Snippet91;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -41,6 +42,8 @@ public class Controls {
 	public DNDExample			dndExample;
 	public BrowserExample		browserExample;
 	public Shell 				browserShell;
+	public Shell				dndTreeShell;
+	public Snippet91			dndTreeExample;
 
 	public static Controls getInstance() {
 		if (instance == null) {

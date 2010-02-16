@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     Ketan Padegaonkar - initial API and implementation
  *******************************************************************************/
@@ -22,7 +22,9 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.bindings.keys.KeyStroke;
+import org.eclipse.jface.util.Geometry;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -602,7 +604,7 @@ public abstract class AbstractSWTBot<T extends Widget> {
 	protected void assertEnabled() {
 		Assert.isTrue(isEnabled(), MessageFormat.format("Widget {0} is not enabled.", this)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
-	
+
 	/**
 	 * Wait until the widget is enabled.
 	 * 
@@ -864,22 +866,42 @@ public abstract class AbstractSWTBot<T extends Widget> {
 	}
 
 	/**
-	 * Performs a drag and drop operation from this widget to the given target
+	 * Performs a drag and drop operation from this widget to the given target. The drag start location will be chosen
+	 * depending on this widget's default implementation.
 	 * 
 	 * @param target To perform the drop on
+	 * @see #dragAndDrop(Point)
 	 */
 	// TODO add modifier key mask
 	public void dragAndDrop(final AbstractSWTBot<? extends Widget> target) {
-		final Rectangle sourceLocation = absoluteLocation();
-		final int sourceOffsetX = Math.min((sourceLocation.width / 2), 10);
-		final int sourceOffsetY = Math.min((sourceLocation.height / 2), 10);
-		Point dragLocation = new Point(sourceLocation.x + sourceOffsetX, sourceLocation.y + sourceOffsetY);
-		dragAndDrop(dragLocation, target);
+		dragAndDrop(on(target));
 	}
 
+	/**
+	 * Performs a DND operation to an arbitrary location. The drag start location will be chosen depending on this
+	 * widget's default implementation.
+	 * 
+	 * @param target The target locations where the DND shall finish.
+	 * @see #before(AbstractSWTBot)
+	 * @see #on(AbstractSWTBot)
+	 * @see #after(AbstractSWTBot)
+	 */
+	public void dragAndDrop(final Point target) {
+		final Rectangle sourceLocation = absoluteLocation();
+		final Point slightOffset = Geometry.add(Geometry.getLocation(sourceLocation), new Point(10, 10));
+		doDragAndDrop(Geometry.min(Geometry.centerPoint(sourceLocation), slightOffset), target);
+	}
+
+	/**
+	 * Performs a DND operation starting at an arbitrary location, targeting the given widget.
+	 * 
+	 * @param source From where to start dragging
+	 * @param target Where to drop onto
+	 * @see #dragAndDrop(AbstractSWTBot)
+	 * @see #dragAndDrop(Point)
+	 */
 	protected void dragAndDrop(final Point source, final AbstractSWTBot<? extends Widget> target) {
-		final Rectangle targetLocation = target.absoluteLocation();
-		doDragAndDrop(source, new Point(targetLocation.x + (targetLocation.width / 2), targetLocation.y + (targetLocation.height / 2)));
+		doDragAndDrop(source, on(target));
 	}
 
 	/**
@@ -923,6 +945,52 @@ public abstract class AbstractSWTBot<T extends Widget> {
 			throw new RuntimeException(e);
 		}
 
+	}
+
+	/**
+	 * Calculates a position which can be used to insert an item <em>before</em> the given one by a DND operation.
+	 * 
+	 * @param targetItem Before which the new item shall appear
+	 * @return A point suitable to drop an item before {@code targetItem}
+	 * @see #dragAndDrop(Point)
+	 * @see DND#FEEDBACK_INSERT_BEFORE
+	 */
+	public static <T extends Widget> Point before(final AbstractSWTBot<T> targetItem) {
+		return pointOnUpperBorder(targetItem.absoluteLocation());
+	}
+
+	/**
+	 * Calculates a position which can be used to drop something <em>onto</em> the given widget by a DND operation. For
+	 * tree structures, this will most likely result in another child node being added. But how this is handled in
+	 * detail ultimately depends on the "drop action"'s implementation.
+	 * 
+	 * @param targetItem On which to drop
+	 * @return The {@code targetItem}'s center
+	 * @see #dragAndDrop(Point)
+	 * @see DND#FEEDBACK_SELECT
+	 */
+	public static <T extends Widget> Point on(final AbstractSWTBot<T> targetItem) {
+		return Geometry.centerPoint(targetItem.absoluteLocation());
+	}
+
+	/**
+	 * Calculates a position which can be used to insert an item after the given one by a DND operation.
+	 * 
+	 * @param targetItem After which the new item shall appear
+	 * @return A point suitable to drop an item after {@code targetItem}
+	 * @see #dragAndDrop(Point)
+	 * @see DND#FEEDBACK_INSERT_AFTER
+	 */
+	public static <T extends Widget> Point after(final AbstractSWTBot<T> targetItem) {
+		return pointOnLowerBorder(targetItem.absoluteLocation());
+	}
+
+	private static Point pointOnLowerBorder(Rectangle rect) {
+		return new Point(Geometry.centerPoint(rect).x, rect.y + rect.height - 1);
+	}
+
+	public static Point pointOnUpperBorder(Rectangle rect) {
+		return new Point(Geometry.centerPoint(rect).x, rect.y + 1);
 	}
 
 	private void waitForIdle(final Robot robot) {
