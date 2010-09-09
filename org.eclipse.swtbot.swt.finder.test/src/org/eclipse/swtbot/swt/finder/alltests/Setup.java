@@ -121,6 +121,7 @@ public class Setup {
 			controls.browserShell = new Shell(controls.display, SWT.SHELL_TRIM);
 			controls.browserShell.setText("Browser shell");
 			controls.browserShell.setLayout(new FillLayout());
+      }
 
 		if ((controls.dndTreeShell == null) || controls.dndTreeShell.isDisposed()) {
 			controls.dndTreeShell = new Shell(controls.display, SWT.SHELL_TRIM);
@@ -173,6 +174,7 @@ public class Setup {
 			if (!isMac())
 				controls.browserExample = new BrowserExample(controls.browserShell,false);
 			controls.dndExample.open(controls.dndShell);
+      }
 
 		if ((controls.dndTreeExample == null)) {
 			controls.dndTreeExample = new Snippet91();
